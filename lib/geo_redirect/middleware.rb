@@ -14,7 +14,7 @@ module GeoRedirect
 
       @include_paths = Array(options[:include])
       @exclude_paths = Array(options[:exclude])
-      @redirect_after_skip = init_redirect_after_skip(options[:redirect_after_skip])
+      @redirect_later = init_redirect_later(options[:redirect_later])
       @skip_if_block = options[:skip_if]
 
       log 'Initialized middleware'
@@ -24,7 +24,7 @@ module GeoRedirect
       @request = Rack::Request.new(env)
 
       if skip_redirect?
-        handle_redirect_after_skip
+        handle_redirect_later
         @app.call(env)
 
       elsif force_redirect?
@@ -61,8 +61,8 @@ module GeoRedirect
       @skip_if_block.nil? ? false : @skip_if_block.call(@request)
     end
 
-    def handle_redirect_after_skip
-      return if @redirect_after_skip
+    def handle_redirect_later
+      return if @redirect_later
       url = URI.parse(@request.url)
       host = host_by_hostname(url.host)
       remember_host(host)
@@ -190,8 +190,8 @@ module GeoRedirect
       log(message, :error)
     end
 
-    def init_redirect_after_skip(redirect_after_skip_option)
-      redirect_after_skip_option.nil? || redirect_after_skip_option
+    def init_redirect_later(redirect_later_option)
+      redirect_later_option.nil? || redirect_later_option
     end
 
     def request_ip
